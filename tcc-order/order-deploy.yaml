@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcc-order
+  labels:
+    app: tcc-order
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tcc-order
+  template:
+    metadata:
+      labels:
+        app: tcc-order
+    spec:
+      initContainers:
+      - name: db-migration-init
+        image: adnemoretti/tcc-order:latest
+        command: ["/bin/sh", "-c", "/app/scripts/prestart.sh"] 
+        env:
+        - name: POSTGRES_SERVER
+          value: order-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: order_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: order-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: order-secrets
+              key: POSTGRES_PASSWORD
+
+      containers:
+      - name: tcc-order
+        image: adnemoretti/tcc-order:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: POSTGRES_SERVER
+          value: order-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: order_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: order-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: order-secrets
+              key: POSTGRES_PASSWORD
+        - name: SECRET_KEY
+          value: dc3a097ea6bcb8165d3e4aa5ab21778fb0fd3aeae14835e4b8a607c5f638877f
+        - name: ALGORITHM
+          value: HS256
+        - name: ACCESS_TOKEN_EXPIRE_DAYS
+          value: "2"

@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcc-catalog
+  labels:
+    app: tcc-catalog
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tcc-catalog
+  template:
+    metadata:
+      labels:
+        app: tcc-catalog
+    spec:
+      initContainers:
+      - name: db-migration-init
+        image: adnemoretti/tcc-catalog:latest
+        command: ["/bin/sh", "-c", "/app/scripts/prestart.sh"] 
+        env:
+        - name: POSTGRES_SERVER
+          value: catalog-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: catalog_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: catalog-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: catalog-secrets
+              key: POSTGRES_PASSWORD
+
+      containers:
+      - name: tcc-catalog
+        image: adnemoretti/tcc-catalog:latest
+        ports:
+        - containerPort: 8002
+        env:
+        - name: POSTGRES_SERVER
+          value: catalog-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: catalog_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: catalog-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: catalog-secrets
+              key: POSTGRES_PASSWORD
+        - name: SECRET_KEY
+          value: dc3a097ea6bcb8165d3e4aa5ab21778fb0fd3aeae14835e4b8a607c5f638877f
+        - name: ALGORITHM
+          value: HS256
+        - name: ACCESS_TOKEN_EXPIRE_DAYS
+          value: "2"

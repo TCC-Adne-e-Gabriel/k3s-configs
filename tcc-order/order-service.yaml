@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tcc-order
+  labels:
+    app: tcc-order
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8001
+    name: tcc-order
+  selector:
+    app: tcc-order

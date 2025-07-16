@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: customer-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: customer-db
+  template:
+    metadata:
+      labels:
+        app: customer-db
+    spec:
+      containers:
+        - name: customer-db
+          image: 'postgres:14'
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 5432
+          envFrom:
+            - configMapRef:
+                name: customer-secrets
+          volumeMounts:
+            - mountPath: /var/lib/postgresql/data
+              name: postgresdata
+      volumes:
+        - name: postgresdata
+          persistentVolumeClaim:
+            claimName: customer-volume-claim

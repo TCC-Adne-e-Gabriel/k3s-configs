@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: tcc-customer
+  labels:
+    app: tcc-customer
+spec:
+  type: ClusterIP
+  ports:
+  - port: 80
+    targetPort: 8001
+    name: tcc-customer
+  selector:
+    app: tcc-customer

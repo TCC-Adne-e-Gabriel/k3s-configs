@@ -1,0 +1,66 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: tcc-customer
+  labels:
+    app: tcc-customer
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: tcc-customer
+  template:
+    metadata:
+      labels:
+        app: tcc-customer
+    spec:
+      initContainers:
+      - name: db-migration-init
+        image: adnemoretti/tcc-customer:latest
+        command: ["/bin/sh", "-c", "/app/scripts/prestart.sh"] 
+        env:
+        - name: POSTGRES_SERVER
+          value: customer-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: customer_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: customer-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: customer-secrets
+              key: POSTGRES_PASSWORD
+
+      containers:
+      - name: tcc-customer
+        image: adnemoretti/tcc-customer:latest
+        ports:
+        - containerPort: 8001
+        env:
+        - name: POSTGRES_SERVER
+          value: customer-db
+        - name: POSTGRES_PORT
+          value: "5432"
+        - name: POSTGRES_DB
+          value: customer_db
+        - name: POSTGRES_USER
+          valueFrom:
+            configMapKeyRef:
+              name: customer-secrets
+              key: POSTGRES_USER
+        - name: POSTGRES_PASSWORD
+          valueFrom:
+            configMapKeyRef:
+              name: customer-secrets
+              key: POSTGRES_PASSWORD
+        - name: SECRET_KEY
+          value: dc3a097ea6bcb8165d3e4aa5ab21778fb0fd3aeae14835e4b8a607c5f638877f
+        - name: ALGORITHM
+          value: HS256
+        - name: ACCESS_TOKEN_EXPIRE_DAYS
+          value: "2"
