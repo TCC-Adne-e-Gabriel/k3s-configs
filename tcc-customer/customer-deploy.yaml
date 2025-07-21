@@ -59,8 +59,8 @@ spec:
               name: customer-secrets
               key: POSTGRES_PASSWORD
         - name: SECRET_KEY
-          value: dc3a097ea6bcb8165d3e4aa5ab21778fb0fd3aeae14835e4b8a607c5f638877f
+          value: <token>
         - name: ALGORITHM
-          value: HS256
+          value: <algorithn>
         - name: ACCESS_TOKEN_EXPIRE_DAYS
-          value: "2"
+          value: "<days>"
